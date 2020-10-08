@@ -107,7 +107,6 @@ module FastJsonapi
 
         if fieldset
           fieldset_key = fieldset.join('_')
-          params_key = params.empty? ? nil : params.to_a.sort_by {|k,v| k.to_s}.join(':')
 
           # Use a fixed-length fieldset key if the current length is more than
           # the length of a SHA1 digest
@@ -119,6 +118,8 @@ module FastJsonapi
         end
 
         if !params.empty?
+          params_key = params.empty? ? nil : params.to_a.sort_by {|k,v| k.to_s}.join(':')
+
           if params_key&.length.to_i > 40
             params_key = Digest::SHA1.hexdigest(params_key)
           end
