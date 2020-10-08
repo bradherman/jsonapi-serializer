@@ -105,21 +105,26 @@ module FastJsonapi
         options = options ? options.dup : {}
         options[:namespace] ||= 'jsonapi-serializer'
 
-        fieldset_key = fieldset.join('_')
-        params_key = params.empty? ? nil : params.to_a.sort_by {|k,v| k.to_s}.join(':')
+        if fieldset
+          fieldset_key = fieldset.join('_')
+          params_key = params.empty? ? nil : params.to_a.sort_by {|k,v| k.to_s}.join(':')
 
-        # Use a fixed-length fieldset key if the current length is more than
-        # the length of a SHA1 digest
-        if fieldset_key.length > 40
-          fieldset_key = Digest::SHA1.hexdigest(fieldset_key)
+          # Use a fixed-length fieldset key if the current length is more than
+          # the length of a SHA1 digest
+          if fieldset_key.length > 40
+            fieldset_key = Digest::SHA1.hexdigest(fieldset_key)
+          end
+
+          options[:namespace] += "-fieldset:#{fieldset_key}"
         end
 
-        if params_key&.length.to_i > 40
-          params_key = Digest::SHA1.hexdigest(params_key)
-        end
+        if !params.empty?
+          if params_key&.length.to_i > 40
+            params_key = Digest::SHA1.hexdigest(params_key)
+          end
 
-        options[:namespace] = "#{options[:namespace]}-fieldset:#{fieldset_key}"
-        options[:namespace] = options[:namespace] + "-params:#{params_key}" if params_key
+          options[:namespace] += "-params:#{params_key}" if params_key
+        end
 
         options
       end
